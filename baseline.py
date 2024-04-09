@@ -1,4 +1,5 @@
 from rocketgym.environment import Environment
+from utils import run_episode
 import math
 
 ACTION_LEFT = 0
@@ -7,7 +8,7 @@ ACTION_RIGHT = 2
 ACTION_NONE = 3
 
 # If you're already vertical
-MID_DESCENT_VEL = -5  # How fast should you descend during flight
+MID_DESCENT_VEL = -4  # How fast should you descend during flight
 LANDING_DESCENT_VEL = -0.1  # How fast should you descend when you're about to land
 LANDING_POS_THRESH = 1  # What's the threshold for being "about to land"
 
@@ -16,10 +17,6 @@ P = 1
 D = 0.2
 ANGLE_THRESH_UPPER = 5 / 180 * math.pi
 ANGLE_THRESH_LOWER = -5 / 180 * math.pi
-
-env = Environment()
-env.curriculum.start_height = 5
-env.curriculum.enable_random_starting_rotation()
 
 
 def slow_descent(observation):
@@ -47,14 +44,4 @@ def baseline_policy(observation):
     return action
 
 if __name__ == "__main__":
-    observation = env.reset()
-    done = False
-    cum_reward = num_timesteps = 0
-    while not done:
-        action = baseline_policy(observation)
-        observation, reward, done, info = env.step(action)
-        num_timesteps += 1
-        cum_reward += reward
-        env.render()
-
-    print("Cumulative reward:", cum_reward)
+    print(run_episode(baseline_policy))
