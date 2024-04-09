@@ -46,15 +46,15 @@ def baseline_policy(observation):
         action = slow_descent(observation)
     return action
 
+if __name__ == "__main__":
+    observation = env.reset()
+    done = False
+    cum_reward = num_timesteps = 0
+    while not done:
+        action = baseline_policy(observation)
+        observation, reward, done, info = env.step(action)
+        num_timesteps += 1
+        cum_reward += reward
+        env.render()
 
-observation = env.reset()
-done = False
-cum_reward = num_timesteps = 0
-while not done:
-    action = baseline_policy(observation)
-    observation, reward, done, info = env.step(action)
-    num_timesteps += 1
-    cum_reward += reward
-    env.render()
-
-print("Cumulative reward:", cum_reward)
+    print("Cumulative reward:", cum_reward)
