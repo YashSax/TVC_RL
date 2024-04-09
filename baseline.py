@@ -1,11 +1,6 @@
 from rocketgym.environment import Environment
-from utils import run_episode
+from utils import *
 import math
-
-ACTION_LEFT = 0
-ACTION_MID = 1
-ACTION_RIGHT = 2
-ACTION_NONE = 3
 
 # If you're already vertical
 MID_DESCENT_VEL = -4  # How fast should you descend during flight

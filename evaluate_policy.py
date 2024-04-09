@@ -1,6 +1,6 @@
 from rocketgym.environment import Environment
 from baseline import baseline_policy
-from utils import run_episode
+from utils import *
 from tqdm import tqdm
 
 total_cum_reward = 0
