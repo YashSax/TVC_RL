@@ -25,6 +25,26 @@ def run_episode(policy, render=True):
 
     return cum_reward
 
+
+LANDING_VEL_Y_THRESH = 1e9
+LANDING_VEL_X_THRESH = 1e9
+LANDING_ANG_VEL_THRESH = 1e9
+LANDING_ANG_THRESH = 1e9
+def crashed(final_observation, env):
+    if env.rocket.position_x < 0 or env.rocket.position_x > env.canvas_shape[1]:
+        return True
+    
+    pos_y, vel_y, vel_x, ang_vel, angle = final_observation
+    print(vel_y, vel_x, ang_vel, angle)
+    if (
+        vel_y > LANDING_VEL_Y_THRESH or
+        vel_x > LANDING_VEL_X_THRESH or 
+        ang_vel > LANDING_ANG_VEL_THRESH or
+        angle > LANDING_ANG_THRESH
+    ):
+        return True
+    
+
 def evaluate_policy(policy, num_episodes=100):
     cum_rewards = []
     for _ in tqdm(range(num_episodes)):
