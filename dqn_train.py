@@ -16,13 +16,8 @@ def train(curriculum, softmax, save_progress, model=None):
 
     # Setting up the environment
     env = Environment()
-    env.curriculum.enable_turn()
+    env.curriculum.start_height = 5
     env.curriculum.enable_random_starting_rotation()
-    env.curriculum.enable_x_velocity_reward()
-
-    if not curriculum:
-        env.curriculum.set_random_height(1, 10)
-        env.curriculum.enable_increasing_height()
 
     if softmax:
         exploration = Exploration.SOFTMAX

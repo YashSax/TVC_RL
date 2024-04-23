@@ -291,6 +291,9 @@ class Environment(gym.Env):
             self.canvas_shape[0] - (self.rocket.position_y * 110)) - self.rocket.icon_idle.shape[0] // 2 - GROUND_HEIGHT
         screen_rocket_pos_x = int(
             (self.rocket.position_x + 11) * 55) - self.rocket.icon_idle.shape[1]//2
+        
+        self.screen_rocket_pos_x = screen_rocket_pos_x
+        self.screen_rocket_pos_y = screen_rocket_pos_y
 
         if screen_rocket_pos_x < 0:
             return
