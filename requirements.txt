@@ -1,3 +1,4 @@
 rocketgym
 gymnasium
 tqdm
+sb3-contrib
