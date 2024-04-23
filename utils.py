@@ -40,7 +40,7 @@ def crashed(final_observation, env):
     ang_vel_violation = ang_vel > LANDING_ANG_VEL_THRESH
     angle_violation = angle > LANDING_ANG_THRESH
     fuel_violation = env.timestep > MAX_TIME_IN_AIR
-    out_of_bounds_violation = pos_x < 0 or env.pos_x > env.canvas_shape[1]
+    out_of_bounds_violation = pos_x < 0 or pos_x > env.canvas_shape[1]
 
     if any([
         vel_violation,
