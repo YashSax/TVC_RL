@@ -6,7 +6,7 @@ import numpy as np
 import math
 import random
 
-from rocketgym.constants import *
+from rocketgym_local.constants import *
 
 
 class QNetwork(nn.Module):

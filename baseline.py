@@ -1,4 +1,4 @@
-from rocketgym.environment import Environment
+from rocketgym_local.environment import Environment
 from utils import *
 import math
 

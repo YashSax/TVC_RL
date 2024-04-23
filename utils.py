@@ -1,4 +1,4 @@
-from rocketgym.environment import Environment
+from rocketgym_local.environment import Environment
 
 ACTION_LEFT = 0
 ACTION_MID = 1

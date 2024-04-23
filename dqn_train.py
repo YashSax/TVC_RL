@@ -1,13 +1,13 @@
-import rocketgym.constants
-from rocketgym.constants import *
-from rocketgym.dashboard import Dashboard
+import rocketgym_local.constants
+from rocketgym_local.constants import *
+from rocketgym_local.dashboard import Dashboard
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import argparse
 
-from rocketgym.environment import Environment
+from rocketgym_local.environment import Environment
 from dqn_network import Agent
 
 
