@@ -11,4 +11,4 @@ policy = lambda observation: agent.choose_action(observation)
 cum_reward = run_episode(policy=policy, render=True)
 print("Example episode Reward:", cum_reward)
 
-# evaluate_policy(policy)
+evaluate_policy(policy)

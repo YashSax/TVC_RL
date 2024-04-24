@@ -280,20 +280,20 @@ class Environment(gym.Env):
         cv2.destroyAllWindows()
         cv2.waitKey(1)
 
-    def __draw_on_canvas(self):
-        """!
-        Draws all objects on canvas to render
-        """
-
+    def get_rocket_screen_position(self):
         GROUND_HEIGHT = 150
-
         screen_rocket_pos_y = int(
             self.canvas_shape[0] - (self.rocket.position_y * 110)) - self.rocket.icon_idle.shape[0] // 2 - GROUND_HEIGHT
         screen_rocket_pos_x = int(
             (self.rocket.position_x + 11) * 55) - self.rocket.icon_idle.shape[1]//2
         
-        self.screen_rocket_pos_x = screen_rocket_pos_x
-        self.screen_rocket_pos_y = screen_rocket_pos_y
+        return screen_rocket_pos_x, screen_rocket_pos_y
+
+    def __draw_on_canvas(self):
+        """!
+        Draws all objects on canvas to render
+        """
+        screen_rocket_pos_x, screen_rocket_pos_y = self.get_rocket_screen_position()
 
         if screen_rocket_pos_x < 0:
             return

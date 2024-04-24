@@ -24,8 +24,7 @@ def run_episode(policy, render=True):
         if render:
             env.render()
 
-    print("Crashed:", crashed(observation, env))
-    return cum_reward
+    return cum_reward, crashed(observation, env)
 
 
 LANDING_VEL_THRESH = 5
@@ -33,8 +32,8 @@ LANDING_ANG_VEL_THRESH = 5
 LANDING_ANG_THRESH = 20 * math.pi / 180
 MAX_TIME_IN_AIR = 4
 def crashed(final_observation, env):
-    pos_y, vel_y, vel_x, ang_vel, angle = final_observation
-    pos_x = env.screen_rocket_pos_x
+    _, vel_y, vel_x, ang_vel, angle = final_observation
+    pos_x, _ = env.get_rocket_screen_position()
 
     vel_violation = (vel_y**2 + vel_x**2)**0.5  > LANDING_VEL_THRESH
     ang_vel_violation = ang_vel > LANDING_ANG_VEL_THRESH
@@ -49,17 +48,19 @@ def crashed(final_observation, env):
         fuel_violation,
         out_of_bounds_violation
     ]):
-        print(vel_violation, ang_vel_violation, angle_violation)
         return True
     return False
     
 
 def evaluate_policy(policy, num_episodes=100):
     cum_rewards = []
+    total_crashes = 0
     for _ in tqdm(range(num_episodes)):
-        cum_reward = run_episode(policy, render=False)
+        cum_reward, crashed = run_episode(policy, render=False)
         cum_rewards.append(cum_reward)
+        total_crashes += crashed
 
     print("Average Cumulative Reward:", sum(cum_rewards) / num_episodes)
     print("Best performance:", max(cum_rewards))
     print("Worst performance:", min(cum_rewards))
+    print("Crash percentage:", total_crashes / num_episodes * 100)
