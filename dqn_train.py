@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import argparse
+import json
 
 from rocketgym_local.environment import Environment
 from dqn_network import Agent
@@ -47,8 +48,7 @@ def train(curriculum, softmax, save_progress, model=None):
     velocities = []
     angles = []
 
-    n_games = 2000
-
+    n_games = 10
     for i in range(n_games):
         score = 0
         done = False
@@ -93,6 +93,9 @@ def train(curriculum, softmax, save_progress, model=None):
 
         print(
             f"Episode: {i}\n\tEpsilon: {agent.epsilon}\n\tScore: {score:.2f}\n\tAverage score: {avg_score:.4f}\n\tAverage velocity: {avg_vel:.2f}\n\tAverage angle: {avg_ang:.2f}")
+    
+    with open("./models/reward.json", "w") as f:
+        json.dump(scores, f)
 
 
 if __name__ == "__main__":
