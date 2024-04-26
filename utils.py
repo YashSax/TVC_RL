@@ -2,13 +2,14 @@ from rocketgym_local.environment import Environment
 from utils import *
 from tqdm import tqdm
 import math
+import torch
 
 ACTION_LEFT = 0
 ACTION_MID = 1
 ACTION_RIGHT = 2
 ACTION_NONE = 3
 
-def run_episode(policy, render=True):
+def run_episode(policy, render=True, tensor=False):
     env = Environment()
     env.curriculum.start_height = 5
     env.curriculum.enable_random_starting_rotation()
@@ -17,7 +18,11 @@ def run_episode(policy, render=True):
     done = False
     cum_reward = num_timesteps = 0
     while not done:
+        if tensor:
+            observation = torch.Tensor(observation)
         action = policy(observation)
+        if tensor:
+            action = action[0].sample().item()
         observation, reward, done, info = env.step(action)
         num_timesteps += 1
         cum_reward += reward
@@ -52,11 +57,11 @@ def crashed(final_observation, env):
     return False
     
 
-def evaluate_policy(policy, num_episodes=100):
+def evaluate_policy(policy, num_episodes=100, tensor=False):
     cum_rewards = []
     total_crashes = 0
     for _ in tqdm(range(num_episodes)):
-        cum_reward, crashed = run_episode(policy, render=False)
+        cum_reward, crashed = run_episode(policy, render=False, tensor=tensor)
         cum_rewards.append(cum_reward)
         total_crashes += crashed
 

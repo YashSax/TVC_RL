@@ -168,6 +168,7 @@ class Environment(gym.Env):
         self.curriculum = Curriculum()
         self.reset()
 
+        self.observation_space = gym.spaces.Box(low=np.array([-np.pi/2, 0, -np.inf, -np.inf, -np.inf]), high=np.array([np.pi/2, np.inf, np.inf, np.inf, np.inf]))
         self.action_space = gym.spaces.Discrete(4)
 
     def reset(self):
