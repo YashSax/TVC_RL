@@ -25,12 +25,13 @@ class Curriculum():
             c) rocket starts in an upright position
         """
 
-        self.set_fixed_height()
+        # self.set_fixed_height()
         self.disable_turn()
-        self.disable_random_starting_rotation()
-        self.disable_random_height()
-        self.disable_x_velocity_reward()
-        self.disable_landing_target()
+        self.enable_random_starting_rotation()
+        self.enable_random_height()
+        self.set_random_height(5,5)
+        self.enable_x_velocity_reward()
+        self.enable_landing_target()
 
     def set_fixed_height(self):
         """!
@@ -231,7 +232,7 @@ class Environment(gym.Env):
         reward = -PENALTY_PER_SECOND * TIMESTEP
 
         if self.rocket.position_y <= 0:
-            reward = REWARD_LANDING - abs(self.rocket.velocity_y + 1) - \
+            reward = REWARD_LANDING - abs(self.rocket.velocity_y) - \
                 PENALTY_PER_RADIAN_AT_LANDING * self.rocket.get_unsigned_angle_with_y_axis() - \
                 PENALTY_PER_ANGULAR_VELOCITY_AT_LANDING * \
                 abs(self.rocket.angular_velocity)
@@ -246,7 +247,7 @@ class Environment(gym.Env):
 
         self.timestep += TIMESTEP
 
-        return self.__get_state(), reward, self.rocket.position_y <= 0 or abs(self.rocket.position_x) > 10, {}
+        return self.__get_state(), reward, self.rocket.position_y <= 0, {}
 
     def render(self, mode="human"):
         """!

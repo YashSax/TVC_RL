@@ -5,7 +5,7 @@ import math
 # If you're already vertical
 MID_DESCENT_VEL = -4  # How fast should you descend during flight
 LANDING_DESCENT_VEL = -0.1  # How fast should you descend when you're about to land
-LANDING_POS_THRESH = 1  # What's the threshold for being "about to land"
+LANDING_POS_THRESH = 0.3  # What's the threshold for being "about to land"
 
 # If you're not vertical
 P = 1
@@ -39,4 +39,6 @@ def baseline_policy(observation):
     return action
 
 if __name__ == "__main__":
-    print(run_episode(baseline_policy))
+    while True:
+        input()
+        print(run_episode(baseline_policy))

@@ -1,3 +1,4 @@
 models/model_*
 !models/model_1900
 logs/
+/**/__pycache__/

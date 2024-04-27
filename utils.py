@@ -12,8 +12,8 @@ ACTION_NONE = 3
 
 def run_episode(policy, render=True, tensor=False):
     env = Environment()
-    env.curriculum.start_height = 5
-    env.curriculum.enable_random_starting_rotation()
+    # env.curriculum.start_height = 5
+    # env.curriculum.enable_random_starting_rotation()
 
     observation = env.reset()
     done = False
