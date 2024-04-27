@@ -3,6 +3,7 @@ from utils import *
 from tqdm import tqdm
 import math
 import torch
+import random
 
 ACTION_LEFT = 0
 ACTION_MID = 1
@@ -38,13 +39,13 @@ LANDING_ANG_THRESH = 20 * math.pi / 180
 MAX_TIME_IN_AIR = 4
 def crashed(final_observation, env):
     _, vel_y, vel_x, ang_vel, angle = final_observation
-    pos_x, _ = env.get_rocket_screen_position()
+    pos_x = env.rocket.position_x
 
     vel_violation = (vel_y**2 + vel_x**2)**0.5  > LANDING_VEL_THRESH
     ang_vel_violation = ang_vel > LANDING_ANG_VEL_THRESH
     angle_violation = angle > LANDING_ANG_THRESH
     fuel_violation = env.timestep > MAX_TIME_IN_AIR
-    out_of_bounds_violation = pos_x < 0 or pos_x > env.canvas_shape[1]
+    out_of_bounds_violation = pos_x < -10 or pos_x > 10
 
     if any([
         vel_violation,
@@ -57,7 +58,7 @@ def crashed(final_observation, env):
     return False
     
 
-def evaluate_policy(policy, num_episodes=100, tensor=False):
+def evaluate_policy(policy, num_episodes=300, tensor=False):
     cum_rewards = []
     total_crashes = 0
     for _ in tqdm(range(num_episodes)):
@@ -69,3 +70,11 @@ def evaluate_policy(policy, num_episodes=100, tensor=False):
     print("Best performance:", max(cum_rewards))
     print("Worst performance:", min(cum_rewards))
     print("Crash percentage:", total_crashes / num_episodes * 100)
+
+def almost_out_of_bounds(env):
+    pos_x, vel_x = env.rocket.position_x, env.rocket.velocity_x
+    if pos_x + vel_x > 8.5:
+        return "right"
+    if pos_x + vel_x < -8.5:
+        return "left"
+    return None
