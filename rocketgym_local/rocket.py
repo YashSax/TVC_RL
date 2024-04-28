@@ -46,6 +46,9 @@ class Rocket(Vector):
         self.velocity_x = 0
         self.velocity_y = 0
 
+        self.acceleration_x = 0
+        self.acceleration_y = 0
+
         self.angular_velocity = 0
 
         self.weight = weight
@@ -91,10 +94,12 @@ class Rocket(Vector):
         rotate_force = tvc.current_thrust * \
             tvc.get_component_along_vector(side)
 
-        self.velocity_x += TIMESTEP * (along.x * push_force) / self.weight
+        self.acceleration_x = (along.x * push_force) / self.weight
+        self.acceleration_y = -1 * GRAVITY + (along.y * push_force) / self.weight
 
-        self.velocity_y -= TIMESTEP * GRAVITY
-        self.velocity_y += TIMESTEP * (along.y * push_force) / self.weight
+        self.velocity_x += TIMESTEP * self.acceleration_x
+
+        self.velocity_y += TIMESTEP * self.acceleration_y
 
         self.position_x += TIMESTEP * self.velocity_x
         self.position_y += TIMESTEP * self.velocity_y
