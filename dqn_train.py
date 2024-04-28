@@ -7,18 +7,19 @@ import numpy as np
 import torch
 import argparse
 import json
+import os.path
 
 from rocketgym_local.environment import Environment
 from dqn_network import Agent
 
 
-def train(curriculum, softmax, save_progress, model=None):
+def train(curriculum, softmax, save_progress, model=None, directory="models", epochs=50, steps_per_epoch=4000, max_ep_len=1000):
     dash = Dashboard()
 
     # Setting up the environment
     env = Environment()
-    env.curriculum.start_height = 5
-    env.curriculum.enable_random_starting_rotation()
+    # env.curriculum.start_height = 5
+    # env.curriculum.enable_random_starting_rotation()
 
     if softmax:
         exploration = Exploration.SOFTMAX
@@ -41,61 +42,70 @@ def train(curriculum, softmax, save_progress, model=None):
                       input_dims=[5], batch_size=64, n_actions=4, exploration_dec=exploration_dec, exploration_min=exploration_min, exploration=exploration)
         agent.q_eval.load_state_dict(torch.load(model))
 
-        env.curriculum.set_random_height(1, 10)
-        env.curriculum.enable_increasing_height()
+        # env.curriculum.set_random_height(1, 10)
+        # env.curriculum.enable_increasing_height()
 
     scores = []
     velocities = []
     angles = []
 
-    n_games = 10
-    for i in range(n_games):
-        score = 0
-        done = False
+    episode = 0
+    for epoch in range(epochs):
+        steps_this_epoch = 0
+        while steps_this_epoch < steps_per_epoch:
+            steps_this_episode = 0
+            episode += 1
 
-        if curriculum and i == 200:
-            env.curriculum.set_random_height(1, 1)
-            env.curriculum.enable_increasing_height()
+            score = 0
+            done = False
 
-        observation = env.reset()
+            if curriculum and i == 200:
+                env.curriculum.set_random_height(1, 1)
+                env.curriculum.enable_increasing_height()
 
-        while not done:
-            action = agent.choose_action(observation)
-            new_observation, reward, done, info = env.step(action)
-            score += reward
+            observation = env.reset()
 
-            agent.store_transition(observation, action,
-                                   reward, new_observation, done)
-            agent.learn()
+            while not done:
+                action = agent.choose_action(observation)
+                new_observation, reward, done, info = env.step(action)
+                score += reward
+                steps_this_episode += 1
 
-            observation = new_observation
+                agent.store_transition(observation, action,
+                                    reward, new_observation, done)
+                agent.learn()
 
-            if model is not None or i >= 1950:
-                env.render()
+                observation = new_observation
 
-        if save_progress and i % 100 == 0:
-            dash.plot_log(env.rocket.flight_log, episode=i)
-            torch.save(agent.q_eval.state_dict(),
-                       f"models/model_{i}")
+                if model is not None or steps_this_episode >= max_ep_len:
+                    # env.render()
+                    break
+            
+            steps_this_epoch += steps_this_episode
 
-        scores.append(score)
+            if save_progress and episode % 100 == 0:
+                # dash.plot_log(env.rocket.flight_log, episode=episode)
+                torch.save(agent.q_eval.state_dict(),
+                        os.path.join(directory, f"model_{episode}"))
 
-        avg_score = np.mean(scores[-100:])
-        velocity = env.rocket.flight_log.velocity_y[-1]
+            scores.append(score)
 
-        if velocity < 0:
-            velocities.append(velocity)
-            angles.append(math.degrees(
-                env.rocket.get_unsigned_angle_with_y_axis()))
+            avg_score = np.mean(scores[-100:])
+            velocity = env.rocket.flight_log.velocity_y[-1]
 
-        avg_vel = np.mean(velocities[-100:])
-        avg_ang = np.mean(angles[-100:])
+            if velocity < 0:
+                velocities.append(velocity)
+                angles.append(math.degrees(
+                    env.rocket.get_unsigned_angle_with_y_axis()))
 
-        print(
-            f"Episode: {i}\n\tEpsilon: {agent.epsilon}\n\tScore: {score:.2f}\n\tAverage score: {avg_score:.4f}\n\tAverage velocity: {avg_vel:.2f}\n\tAverage angle: {avg_ang:.2f}")
-    
-    with open("./models/reward.json", "w") as f:
-        json.dump(scores, f)
+            avg_vel = np.mean(velocities[-100:])
+            avg_ang = np.mean(angles[-100:])
+            if episode % 100 == 0:
+                print(
+                    f"Episode: {episode}\n\tEpsilon: {agent.epsilon}\n\tScore: {score:.2f}\n\tAverage score: {avg_score:.4f}\n\tAverage velocity: {avg_vel:.2f}\n\tAverage angle: {avg_ang:.2f}")
+        
+        with open(os.path.join(directory, "reward.json"), "w") as f:
+            json.dump(scores, f)
 
 
 if __name__ == "__main__":
@@ -110,7 +120,12 @@ if __name__ == "__main__":
                         help="Save flight logs and models every 100 episodes")
     parser.add_argument('-model',
                         help="Path to the model to load. Overrides the curriculum and exploration settings. Renders the scene from the start.")
+    parser.add_argument('-dir',
+                        help="Path to save the results.")
+    parser.add_argument("-epochs", type=int)
+    parser.add_argument("-steps_per_epoch", type=int)
+    parser.add_argument("-max_ep_len", type=int)
 
     args = parser.parse_args()
 
-    train(args.curriculum, args.softmax, args.save, args.model)
+    train(args.curriculum, args.softmax, args.save, args.model, args.dir, args.epochs, args.steps_per_epoch, args.max_ep_len)

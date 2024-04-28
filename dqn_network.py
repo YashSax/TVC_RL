@@ -9,21 +9,27 @@ import random
 from rocketgym_local.constants import *
 
 
+def mlp(sizes, activation, output_activation=nn.Identity):
+    layers = []
+    for j in range(len(sizes)-1):
+        act = activation if j < len(sizes)-2 else output_activation
+        layers += [nn.Linear(sizes[j], sizes[j+1]), act()]
+    return nn.Sequential(*layers)
+
 class QNetwork(nn.Module):
-    def __init__(self, lr, input_dims, layer1_dims, n_actions):
+    def __init__(self, lr, input_dims, n_actions, hidden_sizes=[32,32], activation=nn.Tanh):
         """!
         Initializes a Deep Q Network used to estimate Q-values of possible actions.
 
         @param lr           (float): Learning rate
         @param input_dims   (int): Input dimensions
-        @param layer1_dims  (int): Dimensions in the first layer
+        @param hidden_sizes (list of int): Dimensions in the hidden layers
         @param n_actions    (int): Number of possible actions
         """
 
         super(QNetwork, self).__init__()
 
-        self.fc1 = nn.Linear(*input_dims, layer1_dims)
-        self.fc3 = nn.Linear(layer1_dims, n_actions)
+        self.network = mlp([input_dims] + hidden_sizes + [n_actions], activation)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.loss = nn.L1Loss()
@@ -37,14 +43,13 @@ class QNetwork(nn.Module):
         @param state (list): current environment's state
         """
 
-        x = T.tanh(self.fc1(state))
-        actions = self.fc3(x)
+        actions = self.network(state)
 
         return actions
 
 
 class Agent():
-    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, n_actions=4, max_mem_size=25000, exploration_min=0.01, exploration_dec=3e-4, exploration=Exploration.EPSILON_GREEDY):
+    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, n_actions=4, hidden_sizes=[32,32], max_mem_size=25000, exploration_min=0.01, exploration_dec=3e-4, exploration=Exploration.EPSILON_GREEDY, beta=0):
         """!
         Initializes an Agent. 
         Note that Agent is seperate from the Deep Q Network.
@@ -52,9 +57,10 @@ class Agent():
         @param gamma        (float): Discount factor
         @param epsilon      (float): Initial epsilon in the epsilon-greedy exploration strategy
         @param lr           (float): Learning rate
-        @param input_dims   (int): Dimensions of the state space
+        @param input_dims   (int): Dimensions of the state space ACTUALLY IT'S A LIST???
         @param batch_size   (int): Batch size
         @param n_actions    (int): Size of the action space
+        @param hidden_sizes (list of int): Dimensions in the hidden layers
         @param max_mem_size (float): Size of memory replay buffer
         @param exploration_min      (float): Minimum size of epsilon in the epsilon-greedy exploration strategy
         @param exploration_dec      (float): Decrease step of epsilon in the epsilon-greedy exploration strategy
@@ -62,6 +68,9 @@ class Agent():
         """
 
         self.gamma = gamma
+
+        # beta = 0 is normal Q-learning, beta = 1 is most pessimistic minimax learning
+        self.beta = beta
 
         self.exploration = exploration
 
@@ -76,7 +85,7 @@ class Agent():
         self.mem_cntr = 0
 
         self.q_eval = QNetwork(
-            lr=lr, input_dims=input_dims, layer1_dims=32, n_actions=n_actions)
+            lr=lr, input_dims=input_dims[0], hidden_sizes=hidden_sizes, n_actions=n_actions)
 
         self.state_buffer = np.zeros(
             (self.buffer_size, *input_dims), dtype=np.float32)
@@ -149,7 +158,8 @@ class Agent():
         q_next = self.q_eval.feed_forward(new_state_batch)
         q_next[terminal_batch] = 0.0
 
-        q_target = reward_batch + self.gamma * T.max(q_next, dim=1)[0]
+        # beta-pessimistic q-learning
+        q_target = reward_batch + self.gamma * ((1 - self.beta) * T.max(q_next, dim=1)[0] + self.beta * T.min(q_next, dim=1)[0])
 
         loss = self.q_eval.loss(q_target, q_eval).to(self.q_eval.device)
         loss.backward()
