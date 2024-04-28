@@ -68,10 +68,3 @@ def evaluate_policy(policy, num_episodes=300, tensor=False):
     print("Worst performance:", min(cum_rewards))
     print("Crash percentage:", total_crashes / num_episodes * 100)
 
-def almost_out_of_bounds(env):
-    pos_x, vel_x = env.rocket.position_x, env.rocket.velocity_x
-    if pos_x + vel_x > 8.5:
-        return "right"
-    if pos_x + vel_x < -8.5:
-        return "left"
-    return None
