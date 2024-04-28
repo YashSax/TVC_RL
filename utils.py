@@ -12,8 +12,6 @@ ACTION_NONE = 3
 
 def run_episode(policy, render=True, tensor=False):
     env = Environment()
-    # env.curriculum.start_height = 5
-    # env.curriculum.enable_random_starting_rotation()
 
     observation = env.reset()
     done = False
@@ -34,28 +32,27 @@ def run_episode(policy, render=True, tensor=False):
 
 
 LANDING_VEL_THRESH = 5
-LANDING_ANG_VEL_THRESH = 5
-LANDING_ANG_THRESH = 20 * math.pi / 180
+LANDING_ANG_VEL_THRESH = 2
+LANDING_ANG_THRESH = 15 * math.pi / 180
 MAX_TIME_IN_AIR = 4
 def crashed(final_observation, env):
     _, vel_y, vel_x, ang_vel, angle = final_observation
     pos_x = env.rocket.position_x
 
     vel_violation = (vel_y**2 + vel_x**2)**0.5  > LANDING_VEL_THRESH
-    ang_vel_violation = ang_vel > LANDING_ANG_VEL_THRESH
-    angle_violation = angle > LANDING_ANG_THRESH
+    ang_vel_violation = abs(ang_vel) > LANDING_ANG_VEL_THRESH
+    angle_violation = abs(angle) > LANDING_ANG_THRESH
     fuel_violation = env.timestep > MAX_TIME_IN_AIR
     out_of_bounds_violation = pos_x < -10 or pos_x > 10
 
-    if any([
-        vel_violation,
-        ang_vel_violation,
-        angle_violation,
-        fuel_violation,
-        out_of_bounds_violation
-    ]):
-        return True
-    return False
+    violations = [vel_violation, ang_vel_violation, angle_violation, fuel_violation, out_of_bounds_violation]
+    names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
+
+    for v, n in zip(violations, names):
+        if v:
+            print("Violation occured:", n)
+
+    return any(violations)
     
 
 def evaluate_policy(policy, num_episodes=300, tensor=False):
