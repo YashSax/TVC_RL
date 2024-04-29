@@ -50,16 +50,14 @@ LANDING_ANG_THRESH = 15 * math.pi / 180
 MAX_TIME_IN_AIR = 4
 def crashed(final_observation, env, verbose=False):
     _, vel_y, vel_x, ang_vel, angle = final_observation
-    pos_x = env.rocket.position_x
 
     vel_violation = (vel_y**2 + vel_x**2)**0.5  > LANDING_VEL_THRESH
     ang_vel_violation = abs(ang_vel) > LANDING_ANG_VEL_THRESH
     angle_violation = abs(angle) > LANDING_ANG_THRESH
     fuel_violation = env.timestep > MAX_TIME_IN_AIR
-    out_of_bounds_violation = pos_x < -10 or pos_x > 10
 
-    violations = [vel_violation, ang_vel_violation, angle_violation, fuel_violation, out_of_bounds_violation]
-    names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
+    violations = [vel_violation, ang_vel_violation, angle_violation, fuel_violation]
+    names = ["vel", "ang_vel", "angle", "fuel"]
     if verbose:
         for v, n in zip(violations, names):
             if v:

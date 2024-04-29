@@ -4,14 +4,14 @@ import math
 
 # If you're already vertical
 MID_DESCENT_VEL = -4  # How fast should you descend during flight
-LANDING_DESCENT_VEL = -0.1  # How fast should you descend when you're about to land
-LANDING_POS_THRESH = 0.3  # What's the threshold for being "about to land"
+LANDING_DESCENT_VEL = -1  # How fast should you descend when you're about to land
+LANDING_POS_THRESH = 0.5  # What's the threshold for being "about to land"
 
 # If you're not vertical
 P = 1
 D = 0.2
-ANGLE_THRESH_UPPER = 5 / 180 * math.pi
-ANGLE_THRESH_LOWER = -5 / 180 * math.pi
+ANGLE_THRESH_UPPER = 10 / 180 * math.pi
+ANGLE_THRESH_LOWER = -10 / 180 * math.pi
 
 
 def slow_descent(observation):
@@ -23,6 +23,7 @@ def slow_descent(observation):
 
 def orient_vehicle(observation):
     _, _, _, ang_vel, angle = observation
+    # print("Angle:", angle * 180 / math.pi)
     return ACTION_RIGHT if (P * angle - D * ang_vel) > 0 else ACTION_LEFT
 
 
@@ -40,5 +41,4 @@ def baseline_policy(observation):
 
 if __name__ == "__main__":
     while True:
-        input()
-        print(run_episode(baseline_policy, safe=True))
+        print(run_episode(baseline_policy))
