@@ -335,7 +335,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             epoch_ended = t==local_steps_per_epoch-1
 
             if terminal or epoch_ended:
-                num_crashes += crashed(o, env)
+                num_crashes += bool(crashed(o, env))
                 num_episodes += 1
                 if epoch_ended and not(terminal):
                     print('Warning: trajectory cut off by epoch at %d steps.'%ep_len, flush=True)
@@ -349,7 +349,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                     # only save EpRet / EpLen if trajectory finished
                     logger.store(EpRet=ep_ret, EpLen=ep_len)
                 o, ep_ret, ep_len = env.reset(), 0, 0
-            p.update()
+            # p.update()
 
 
         percent_crash = num_crashes / num_episodes * 100
