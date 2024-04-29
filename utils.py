@@ -35,6 +35,12 @@ def run_episode(policy, render=True, tensor=False, safeRL=False):
         if safeRL:
             if is_dangerous(env):
                 _, action = action_with_highest_acc(env)
+        
+        observation, reward, done, info = env.step(action)
+        num_timesteps += 1
+        cum_reward += reward
+        if render:
+            env.render()
 
     return cum_reward, crashed(observation, env)
 
@@ -42,7 +48,7 @@ LANDING_VEL_THRESH = 5
 LANDING_ANG_VEL_THRESH = 2
 LANDING_ANG_THRESH = 15 * math.pi / 180
 MAX_TIME_IN_AIR = 4
-def crashed(final_observation, env):
+def crashed(final_observation, env, verbose=False):
     _, vel_y, vel_x, ang_vel, angle = final_observation
     pos_x = env.rocket.position_x
 
@@ -53,11 +59,12 @@ def crashed(final_observation, env):
     out_of_bounds_violation = pos_x < -10 or pos_x > 10
 
     violations = [vel_violation, ang_vel_violation, angle_violation, fuel_violation, out_of_bounds_violation]
-    names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
+    if verbose:
+        names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
 
-    for v, n in zip(violations, names):
-        if v:
-            print("Violation occured:", n)
+        for v, n in zip(violations, names):
+            if v:
+                print("Violation occured:", n)
 
     return any(violations)
     
