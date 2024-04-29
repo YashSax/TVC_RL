@@ -31,7 +31,7 @@ class Curriculum():
         self.enable_random_height()
         self.set_random_height(5,5)
         self.enable_x_velocity_reward()
-        self.enable_landing_target()
+        self.disable_landing_target()
 
     def set_fixed_height(self):
         """!

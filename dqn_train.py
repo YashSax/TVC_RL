@@ -1,4 +1,3 @@
-import rocketgym_local.constants
 from rocketgym_local.constants import *
 from rocketgym_local.dashboard import Dashboard
 import math
