@@ -41,4 +41,4 @@ def baseline_policy(observation):
 if __name__ == "__main__":
     while True:
         input()
-        print(run_episode(baseline_policy))
+        print(run_episode(baseline_policy, safe=True))

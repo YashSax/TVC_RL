@@ -4,7 +4,6 @@ from utils import *
 from tqdm import tqdm
 import math
 import torch
-import random
 from copy import deepcopy
 
 ACTION_LEFT = 0
@@ -20,7 +19,6 @@ action_dict = {
 }
 
 def run_episode(policy, render=True, tensor=False, safe=False):
-    flag = False
     env = Environment()
     danger_persistence = Persistence(20)
 
@@ -92,13 +90,12 @@ def is_dangerous(curr_env):
     for action in [ACTION_LEFT, ACTION_MID, ACTION_RIGHT, ACTION_NONE]:
         env = deepcopy(curr_env)
         env.step(action)
-        safe, recovery_action = is_safe(env)
+        safe = is_safe(env)
         if not safe:
             return True
     return False
 
-
-def is_safe(curr_env):
+def action_with_highest_acc(curr_env):
     # Find the action that maximizes the y acceleration
     best_acc = -1e99
     best_action = ACTION_NONE
@@ -108,6 +105,10 @@ def is_safe(curr_env):
         if env.rocket.acceleration_y > best_acc:
             best_acc = env.rocket.acceleration_y
             best_action = action
+    return best_acc, best_action
+
+def is_safe(env):
+    best_acc, _ = action_with_highest_acc(env)
     
     # env.rocket.position_y = env.rocket.velocity_y * lt + 1 / 2 * best_acc * lt ^ 2
     # lt <- time it will take to hit the ground if you continue at acceleration = best_acc
@@ -117,11 +118,11 @@ def is_safe(curr_env):
     # print(min_height_time, best_acc, env.rocket.velocity_y)
 
     if min_height > 0:
-        return True, best_action
+        return True
     
     landing_velocity = (env.rocket.velocity_y ** 2 - 2 * best_acc * env.rocket.position_y) ** 0.5
 
-    return landing_velocity <= LANDING_VEL_THRESH, best_action
+    return landing_velocity <= LANDING_VEL_THRESH
 
 class Persistence():
     def __init__(self, n, on_val=True, off_val=False):
