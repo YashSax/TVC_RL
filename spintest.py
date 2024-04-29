@@ -7,10 +7,10 @@ def spinpg():
     env = Environment()
     ac_kwargs = dict(hidden_sizes=[64,64], activation=torch.nn.ReLU)
     logger_kwargs = dict(output_dir='./base_ppo_results', exp_name='ppo')
-    ppo(lambda: env, steps_per_epoch=1000, epochs=100, ac_kwargs=ac_kwargs, logger_kwargs=logger_kwargs)
+    ppo(lambda: env, steps_per_epoch=1000, epochs=100, ac_kwargs=ac_kwargs, logger_kwargs=logger_kwargs, safe_rl=None) 
 
 def test_model():
-    model = torch.load("./base_ppo_results/pyt_save/model.pt").pi
+    model = torch.load("./teacher_assist_ppo/pyt_save/model.pt").pi
     model.eval()
     evaluate_policy(model, tensor=True)
 

@@ -8,21 +8,21 @@
     },
     "actor_critic":	"MLPActorCritic",
     "clip_ratio":	0.2,
-    "env_fn":	"<function spinpg.<locals>.<lambda> at 0x7f9791a0ff70>",
+    "env_fn":	"<function spinpg.<locals>.<lambda> at 0x7f0322d410d0>",
     "epochs":	100,
     "exp_name":	"ppo",
     "gamma":	0.99,
     "lam":	0.97,
     "logger":	{
-        "<spinup.utils.logx.EpochLogger object at 0x7f9791a0abb0>":	{
+        "<spinup.utils.logx.EpochLogger object at 0x7f0322d38bb0>":	{
             "epoch_dict":	{},
             "exp_name":	"ppo",
             "first_row":	true,
             "log_current_row":	{},
             "log_headers":	[],
-            "output_dir":	"./base_ppo_results",
+            "output_dir":	"./teacher_assist_ppo_results",
             "output_file":	{
-                "<_io.TextIOWrapper name='./base_ppo_results/progress.txt' mode='w' encoding='UTF-8'>":	{
+                "<_io.TextIOWrapper name='./teacher_assist_ppo_results/progress.txt' mode='w' encoding='UTF-8'>":	{
                     "mode":	"w"
                 }
             }
@@ -30,11 +30,11 @@
     },
     "logger_kwargs":	{
         "exp_name":	"ppo",
-        "output_dir":	"./base_ppo_results"
+        "output_dir":	"./teacher_assist_ppo_results"
     },
     "max_ep_len":	1000,
     "pi_lr":	0.0003,
-    "safe_rl":	null,
+    "safe_rl":	"teacher_assist",
     "save_freq":	10,
     "seed":	0,
     "steps_per_epoch":	1000,

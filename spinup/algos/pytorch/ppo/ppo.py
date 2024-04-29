@@ -299,10 +299,27 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     for epoch in range(epochs):
         num_crashes = 0
         num_episodes = 0
+
+        if safe_rl == "automated_recovery":
+            p = Persistence(10)
+        
         for t in range(local_steps_per_epoch):
             a, v, logp = ac.step(torch.as_tensor(o, dtype=torch.float32))
 
+            reward_penalty = 0
+            if safe_rl == "teacher_assist":
+                if is_dangerous(env):
+                    _, a = action_with_highest_acc(env)
+                    reward_penalty += 1
+            elif safe_rl == "automated_recovery":
+                if is_dangerous(env):
+                    p.on()
+                    reward_penalty += 1
+                if p.is_on():
+                    _, a = action_with_highest_acc(env)
+            
             next_o, r, d, _ = env.step(a)
+            r -= reward_penalty
             ep_ret += r
             ep_len += 1
 
@@ -332,6 +349,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                     # only save EpRet / EpLen if trajectory finished
                     logger.store(EpRet=ep_ret, EpLen=ep_len)
                 o, ep_ret, ep_len = env.reset(), 0, 0
+            p.update()
 
 
         percent_crash = num_crashes / num_episodes * 100
@@ -345,7 +363,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         # Log info about epoch
         logger.log_tabular('Epoch', epoch)
         logger.log_tabular('EpRet', with_min_and_max=True)
-        logger.log_tabular('% Crash', percent_crash)
+        logger.log_tabular('%Crash', percent_crash)
         logger.log_tabular('EpLen', average_only=True)
         logger.log_tabular('VVals', with_min_and_max=True)
         logger.log_tabular('TotalEnvInteracts', (epoch+1)*steps_per_epoch)
