@@ -4,6 +4,7 @@ from utils import *
 from tqdm import tqdm
 import math
 import torch
+import random
 from copy import deepcopy
 
 ACTION_LEFT = 0
@@ -18,7 +19,7 @@ action_dict = {
     ACTION_NONE : "none"
 }
 
-def run_episode(policy, render=True, tensor=False, safe=False):
+def run_episode(policy, render=True, tensor=False, safeRL=False):
     env = Environment()
     danger_persistence = Persistence(20)
 
@@ -31,21 +32,11 @@ def run_episode(policy, render=True, tensor=False, safe=False):
         action = policy(observation)
         if tensor:
             action = action[0].sample().item()
-        if safe:
+        if safeRL:
             if is_dangerous(env):
-                danger_persistence.on()
-
-            action = ACTION_MID if danger_persistence.is_on() else ACTION_NONE
-            danger_persistence.update()
-            
-        observation, reward, done, info = env.step(action)
-        num_timesteps += 1
-        cum_reward += reward
-        if render:
-            env.render()
+                _, action = action_with_highest_acc(env)
 
     return cum_reward, crashed(observation, env)
-
 
 LANDING_VEL_THRESH = 5
 LANDING_ANG_VEL_THRESH = 2
@@ -71,11 +62,11 @@ def crashed(final_observation, env):
     return any(violations)
     
 
-def evaluate_policy(policy, num_episodes=300, tensor=False):
+def evaluate_policy(policy, num_episodes=300, tensor=False, safeRL=False):
     cum_rewards = []
     total_crashes = 0
     for _ in tqdm(range(num_episodes)):
-        cum_reward, crashed = run_episode(policy, render=False, tensor=tensor)
+        cum_reward, crashed = run_episode(policy, render=False, tensor=tensor, safeRL=safeRL)
         cum_rewards.append(cum_reward)
         total_crashes += crashed
 
