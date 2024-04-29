@@ -8,6 +8,7 @@ from spinup.utils.logx import EpochLogger
 from spinup.utils.mpi_pytorch import setup_pytorch_for_mpi, sync_params, mpi_avg_grads
 from spinup.utils.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_scalar, num_procs
 from utils import *
+from baseline import baseline_policy
 
 
 class PPOBuffer:
@@ -316,7 +317,9 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                     p.on()
                     reward_penalty += 1
                 if p.is_on():
-                    _, a = action_with_highest_acc(env)
+                    prev_action = a
+                    a = baseline_policy(o)
+                    print(f"Interfering, prev_action = {action_dict[prev_action]} new action = {action_dict[a]}")
             
             next_o, r, d, _ = env.step(a)
             r -= reward_penalty
@@ -349,7 +352,8 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                     # only save EpRet / EpLen if trajectory finished
                     logger.store(EpRet=ep_ret, EpLen=ep_len)
                 o, ep_ret, ep_len = env.reset(), 0, 0
-            # p.update()
+            if safe_rl == "automated_recovery":
+                p.update()
 
 
         percent_crash = num_crashes / num_episodes * 100
