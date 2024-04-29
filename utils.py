@@ -59,28 +59,34 @@ def crashed(final_observation, env, verbose=False):
     out_of_bounds_violation = pos_x < -10 or pos_x > 10
 
     violations = [vel_violation, ang_vel_violation, angle_violation, fuel_violation, out_of_bounds_violation]
+    names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
     if verbose:
-        names = ["vel", "ang_vel", "angle", "fuel", "out of bounds"]
-
         for v, n in zip(violations, names):
             if v:
                 print("Violation occured:", n)
 
-    return any(violations)
+    return [n for n, v in zip(names, violations) if v]
     
 
 def evaluate_policy(policy, num_episodes=300, tensor=False, safeRL=False):
     cum_rewards = []
     total_crashes = 0
+    crash_types = {}
     for _ in tqdm(range(num_episodes)):
         cum_reward, crashed = run_episode(policy, render=False, tensor=tensor, safeRL=safeRL)
         cum_rewards.append(cum_reward)
-        total_crashes += crashed
+        total_crashes += bool(crashed)
+        for c in crashed:
+            crash_types[c] = crash_types.get(c, 0) + 1
 
-    print("Average Cumulative Reward:", sum(cum_rewards) / num_episodes)
+    mean_reward = sum(cum_rewards) / num_episodes
+    std_reward = (sum((r - mean_reward) ** 2 for r in cum_rewards) / num_episodes) ** 0.5
+    print("Average Cumulative Reward:", mean_reward)
+    print("Standard Deviation:", std_reward)
     print("Best performance:", max(cum_rewards))
     print("Worst performance:", min(cum_rewards))
     print("Crash percentage:", total_crashes / num_episodes * 100)
+    print("Crash type breakdown:", crash_types)
 
 
 def is_dangerous(curr_env):
