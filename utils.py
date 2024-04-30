@@ -110,20 +110,20 @@ def action_with_highest_acc(curr_env):
     return best_acc, best_action
 
 def is_safe(env):
-    best_acc, _ = action_with_highest_acc(env)
-    
-    # env.rocket.position_y = env.rocket.velocity_y * lt + 1 / 2 * best_acc * lt ^ 2
-    # lt <- time it will take to hit the ground if you continue at acceleration = best_acc
+    # Check unsafe angle, ang_vel
+    angle = env.rocket.get_signed_angle_with_y_axis()
+    ang_vel = env.rocket.angular_velocity
+    if abs(angle + 20 * TIMESTEP * ang_vel) > (70 * math.pi / 180):
+        return False
 
+    # Check unsafe velocity
+    best_acc, _ = action_with_highest_acc(env)
     min_height_time = -env.rocket.velocity_y / best_acc
     min_height = env.rocket.position_y + env.rocket.velocity_y * min_height_time + 1 / 2 * best_acc * min_height_time ** 2
-    # print(min_height_time, best_acc, env.rocket.velocity_y)
-
     if min_height > 0:
         return True
     
     landing_velocity = (env.rocket.velocity_y ** 2 - 2 * best_acc * env.rocket.position_y) ** 0.5
-
     return landing_velocity <= LANDING_VEL_THRESH
 
 class Persistence():
