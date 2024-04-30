@@ -33,8 +33,8 @@ def run_episode(policy, render=True, tensor=False, safeRL=False):
         if tensor:
             action = action[0].sample().item()
         if safeRL:
-            if is_dangerous(env):
-                _, action = action_with_highest_acc(env)
+            safe = is_safe(env)
+            action = random.choice([ACTION_RIGHT])
         
         observation, reward, done, info = env.step(action)
         num_timesteps += 1
@@ -109,12 +109,20 @@ def action_with_highest_acc(curr_env):
             best_action = action
     return best_acc, best_action
 
+
 def is_safe(env):
     # Check unsafe angle, ang_vel
     angle = env.rocket.get_signed_angle_with_y_axis()
     ang_vel = env.rocket.angular_velocity
-    if abs(angle + 20 * TIMESTEP * ang_vel) > (70 * math.pi / 180):
-        return False
+    ang_acc = 11.23637
+
+    if (angle > 0 and ang_vel < 0):
+        ang_acc = -ang_acc
+    
+    if (angle < 0 and ang_vel > 0) or (angle > 0 and ang_vel < 0):
+        theta = angle - ang_vel ** 2 / (2 * ang_acc)
+        if abs(theta) > (50 * math.pi / 180):
+            return False
 
     # Check unsafe velocity
     best_acc, _ = action_with_highest_acc(env)
