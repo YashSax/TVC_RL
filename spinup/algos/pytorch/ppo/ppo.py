@@ -310,21 +310,19 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             reward_penalty = 0
             if safe_rl == "teacher_assist":
                 if is_dangerous(env):
-                    _, a = action_with_highest_acc(env)
-                    reward_penalty += 1
+                    a = baseline_policy(o)
+                    reward_penalty += 5
             elif safe_rl == "automated_recovery":
                 if is_dangerous(env):
                     p.on()
-                    reward_penalty += 1
+                    reward_penalty += 5
                 if p.is_on():
-                    prev_action = a
                     a = baseline_policy(o)
-                    print(f"Interfering, prev_action = {action_dict[prev_action]} new action = {action_dict[a]}")
             
             next_o, r, d, _ = env.step(a)
-            r -= reward_penalty
-            ep_ret += r
+            ep_ret += r 
             ep_len += 1
+            r -= reward_penalty
 
             # save and log
             buf.store(o, a, r, v, logp)
