@@ -1,3 +1,4 @@
 gymnasium
 tqdm
 matplotlib
+torch
