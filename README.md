@@ -1,5 +1,5 @@
 # TVC_RL 
-Instructions to Run:
+## Instructions to Run:
 
 Even though there's a local copy of spinup installed, there are additional dependencies needed. Follow the instructions [here](https://spinningup.openai.com/en/latest/user/installation.html) to install the needed dependencies. Additionally, run `pip install -r requirements.txt`.
 
@@ -7,7 +7,7 @@ Even though there's a local copy of spinup installed, there are additional depen
 
 `spintest.py`: Running `spinpg()` will train a PPO agent on the TVC environment. Pass in `safeRL="teacher_assist"` or `safeRL="automated_recovery"` to `spinpg` to run Teacher Assistance or Automated Recovery, respectively.
 
-Additional Files and Folders:
+## Additional Files and Folders:
 
 `final_models`: Contains the trained models for Vanilla PPO, Teacher Assistance, and Hardcoded Recovery
 
