@@ -1,4 +1,5 @@
 # TVC_RL 
+Note: (Link to Environment Author)[https://github.com/fszewczyk/rocket-landing-rl]
 ## Instructions to Run:
 
 Even though there's a local copy of spinup installed, there are additional dependencies needed. Follow the instructions [here](https://spinningup.openai.com/en/latest/user/installation.html) to install the needed dependencies. Additionally, run `pip install -r requirements.txt`.
