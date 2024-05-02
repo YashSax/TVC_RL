@@ -121,7 +121,7 @@ def is_safe(env):
     
     if (angle < 0 and ang_vel > 0) or (angle > 0 and ang_vel < 0):
         theta = angle - ang_vel ** 2 / (2 * ang_acc)
-        if abs(theta) > (50 * math.pi / 180):
+        if abs(theta) > (20 * math.pi / 180):
             return False
 
     # Check unsafe velocity

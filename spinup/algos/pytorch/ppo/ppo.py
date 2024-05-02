@@ -301,8 +301,13 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         num_crashes = 0
         num_episodes = 0
 
+        vel_crashes = 0
+        ang_vel_crashes = 0
+        angle_crashes = 0
+        fuel_crashes = 0
+
         if safe_rl == "automated_recovery":
-            p = Persistence(10)
+            p = Persistence(20)
         
         for t in range(local_steps_per_epoch):
             a, v, logp = ac.step(torch.as_tensor(o, dtype=torch.float32))
@@ -315,7 +320,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             elif safe_rl == "automated_recovery":
                 if is_dangerous(env):
                     p.on()
-                    reward_penalty += 5
+                    # reward_penalty += 2
                 if p.is_on():
                     a = baseline_policy(o)
             
@@ -336,8 +341,15 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             epoch_ended = t==local_steps_per_epoch-1
 
             if terminal or epoch_ended:
-                num_crashes += bool(crashed(o, env))
+                crashes = crashed(o, env)
+                num_crashes += bool(crashes)
                 num_episodes += 1
+
+                vel_crashes += "vel" in crashes
+                ang_vel_crashes += "ang_vel" in crashes
+                angle_crashes += "angle" in crashes
+                fuel_crashes += "fuel" in crashes
+
                 if epoch_ended and not(terminal):
                     print('Warning: trajectory cut off by epoch at %d steps.'%ep_len, flush=True)
                 # if trajectory didn't reach terminal state, bootstrap value target
@@ -366,6 +378,10 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         logger.log_tabular('Epoch', epoch)
         logger.log_tabular('EpRet', with_min_and_max=True)
         logger.log_tabular('%Crash', percent_crash)
+        logger.log_tabular('vel_crashes', vel_crashes)
+        logger.log_tabular('ang_vel_crashes', ang_vel_crashes)
+        logger.log_tabular('angle_crashes', angle_crashes)
+        logger.log_tabular('fuel_crashes', fuel_crashes)
         logger.log_tabular('EpLen', average_only=True)
         logger.log_tabular('VVals', with_min_and_max=True)
         logger.log_tabular('TotalEnvInteracts', (epoch+1)*steps_per_epoch)

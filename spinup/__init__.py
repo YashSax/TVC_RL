@@ -11,8 +11,6 @@
 # from spinup.algos.tf1.trpo.trpo import trpo as trpo_tf1
 # from spinup.algos.tf1.vpg.vpg import vpg as vpg_tf1
 
-print("Hello I'm Here")
-
 from spinup.algos.pytorch.ddpg.ddpg import ddpg as ddpg_pytorch
 from spinup.algos.pytorch.ppo.ppo import ppo as ppo_pytorch
 from spinup.algos.pytorch.sac.sac import sac as sac_pytorch
