@@ -22,8 +22,3 @@ Even though there's a local copy of spinup installed, there are additional depen
 Env Notes:
  - State space: [position_y, velocity_y, velocity_x, angular_velocity, angle]
  - Action space: [left, mid, right, none]
-
-Safe RL Notes:
- - Potential safety restrictions:
-    - Sometimes the rocket can just stay in the air forever until the env times out. Make sure that the rocket lands or it'll run out of fuel.
-    - Rocket can stand only so much y_vel or x_vel or angular_vel on landing
